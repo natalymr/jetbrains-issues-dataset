@@ -1,6 +1,7 @@
 import datetime
 import sys
 from urllib import parse
+import re
 
 import urllib3
 from dateutil.relativedelta import relativedelta
@@ -82,11 +83,15 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
 def cur_time():
     return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
+def filename_from_query(query:str, start:datetime, end:datetime):
+    filename = re.sub(r'[^A-Za-z]+', '_', query).strip('_')
+    filename = f'{filename}_{start.strftime("%Y%m%d")}_{end.strftime("%Y%m%d")}'
+    return filename
+
 
 def main():
     import argparse
     import os
-    import re
 
     parser = argparse.ArgumentParser()
 
@@ -158,8 +163,7 @@ def main():
     if args.filename:
         filename = args.filename
     else:
-        filename = re.sub(r'[^A-Za-z]+', '_', query).strip('_')
-        filename = f'{filename}_{args.start.strftime("%Y%m%d")}_{args.end.strftime("%Y%m%d")}'
+        filename = filename_from_query(query, args.start, args.end)
     root, ext = os.path.splitext(filename)
     if not ext:
         ext = '.json'

@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import time
@@ -7,7 +8,7 @@ import requests
 
 ISSUES_QUERY = "issues?query={}&fields=" \
                "id,idReadable,summary,description," \
-               "project(shortName),created,resolved,reporter(login,name,ringId),commentsCount," \
+               "project(shortName),created,resolved,reporter(login,fullName,ringId),commentsCount," \
                "customFields(id,name,value(id,name,login,ringId))," \
                "comments(id,created,text,author(login,name,ringId))," \
                "links(direction,linkType(name,sourceToTarget,targetToSource,directed,aggregation),issues(id,idReadable))" \
@@ -25,10 +26,12 @@ ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCa
                              "IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
                              "SprintCategory,SummaryCategory,TagsCategory" \
                              "&fields=id,idReadable,timestamp,targetMember," \
-                             "target(id,project(shortName),reporter(login,name,ringId),idReadable,text,issue(id)," \
-                             "customFields(id,name,value(id,name,login,ringId))),memberName," \
-                             "added(id,login,name,ringId,text,bundle(id,name))," \
-                             "removed(id,login,name,text,bundle(id,name))" \
+                             "target(id,project(shortName),reporter(login,fullName,ringId),idReadable,text,issue(id)," \
+                             "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
+                             "memberName," \
+                             "added(id,login,name,ringId,text,bundle(id,name),project,numberInProject)," \
+                             "removed(id,login,name,ringId,text,bundle(id,name),project,numberInProject)," \
+                             "author(login,fullName,ringId)" \
                              "&$skip={skip}&$top={top}"
 
 
@@ -71,10 +74,13 @@ class YouTrack:
 
                 self.check_response(activity_list)
 
+                now = round(datetime.datetime.now().timestamp() * 1000)
+
                 with open(file_path, 'a+', encoding='utf-8') as writer:
                     for activity in activity_list:
                         activity['element_type'] = 'activity'
                         activity['issue_id'] = issue_id
+                        activity['downloadTimestamp'] = now
                         line = json.dumps(activity, ensure_ascii=False)
                         writer.write(line + '\n')
 
@@ -85,40 +91,6 @@ class YouTrack:
                     break
             logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)}")
         return total_activities
-
-    def download_activities(self, query, file_path) -> int:
-        skip = 0
-        while True:
-            request_url = self.activity_list_url.format(query, skip, self.page_size)
-
-            activity_list = None
-            attempt = 1
-            while attempt < 5:
-                try:
-                    response = requests.get(request_url, headers=self.headers, verify=False)
-                    activity_list = response.json()
-                    break
-                except Exception as e:
-                    logging.exception(e)
-                    time.sleep(3)
-                attempt += 1
-
-            if activity_list is None:
-                raise Exception("Failed to retrieve activities")
-
-            self.check_response(activity_list)
-
-            with open(file_path, 'a+', encoding='utf-8') as writer:
-                for activity in activity_list:
-                    activity['element_type'] = 'activity'
-                    line = json.dumps(activity, ensure_ascii=False)
-                    writer.write(line + '\n')
-
-            if len(activity_list) < self.page_size:
-                break
-
-            skip += len(activity_list)
-        return skip + len(activity_list)
 
     def download_issues(self, query, file_path, return_ids=False) -> Union[int, List[str]]:
         skip = 0
@@ -132,6 +104,9 @@ class YouTrack:
             if len(loaded_issues) == 0:
                 break
 
+            now = round(datetime.datetime.now().timestamp() * 1000)
+            for issue in all_issues:
+                issue['downloadTimestamp'] = now
             skip += len(loaded_issues)
             all_issues += loaded_issues
 
