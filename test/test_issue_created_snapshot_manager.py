@@ -11,7 +11,7 @@ class TestIssueCreatedSnapshotStrategy(TestCase):
         activity_manager = IdeaActivityManager(snapshot_strategy)
         activity_manager.load_issues_from_activities_file('data/missed_activities.json')
 
-        issue = list(snapshot_strategy.issues.values())[0]
+        issue = list(snapshot_strategy.issues.key_values())[0]
         self.assertEqual(issue['fixed_by'], 'assignee_developer')
         self.assertEqual(issue['fixed_at'], datetime.datetime(2020, 10, 6, 21, 45, 26))
 
@@ -20,7 +20,7 @@ class TestIssueCreatedSnapshotStrategy(TestCase):
         activity_manager = IdeaActivityManager(snapshot_strategy)
         activity_manager.load_issues_from_activities_file('data/missed_activities.json')
 
-        issue = list(snapshot_strategy.issues.values())[0]
+        issue = list(snapshot_strategy.issues.key_values())[0]
         self.assertTrue('summary' in issue)
         self.assertTrue('description' in issue)
         self.assertTrue('state' in issue)
@@ -31,5 +31,5 @@ class TestIssueCreatedSnapshotStrategy(TestCase):
         activity_manager = IdeaActivityManager(snapshot_strategy)
         activity_manager.load_issues_from_activities_file('data/snapshot.json')
 
-        self.assertEqual(145, len(snapshot_strategy.issues.values()))
+        self.assertEqual(145, len(snapshot_strategy.issues.key_values()))
 

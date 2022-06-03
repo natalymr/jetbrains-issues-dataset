@@ -128,5 +128,6 @@ class YouTrack:
     @staticmethod
     def check_response(json_response):
         if 'error' in json_response:
+            print(json_response)
             raise Exception(json_response['error'])
         # print('read {} items'.format(len(json_response)))
