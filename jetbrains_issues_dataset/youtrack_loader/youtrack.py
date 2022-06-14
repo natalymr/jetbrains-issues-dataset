@@ -24,7 +24,7 @@ ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=CommentsCategory,Attach
 ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCategory,AttachmentsCategory," \
                              "AttachmentRenameCategory,CustomFieldCategory,DescriptionCategory,IssueCreatedCategory," \
                              "IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
-                             "SprintCategory,SummaryCategory,TagsCategory" \
+                             "SprintCategory,SummaryCategory,TagsCategory,CommentReactionCategory,VotersCategory" \
                              "&fields=id,idReadable,timestamp,targetMember," \
                              "target(id,project(shortName),reporter(login,fullName,ringId),idReadable,text,issue(id)," \
                              "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
@@ -89,7 +89,7 @@ class YouTrack:
 
                 if len(activity_list) < self.page_size:
                     break
-            logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)}")
+            # logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)}")
         return total_activities
 
     def download_issues(self, query, file_path, return_ids=False) -> Union[int, List[str]]:
