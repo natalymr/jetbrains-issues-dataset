@@ -6,13 +6,13 @@ from typing import Union, List
 
 import requests
 
-ISSUES_QUERY = "issues?query={}&fields=" \
+ISSUES_QUERY = "issues?query={query}&fields=" \
                "id,idReadable,summary,description," \
                "project(shortName),created,resolved,reporter(login,fullName,ringId),commentsCount," \
                "customFields(id,name,value(id,name,login,ringId))," \
                "comments(id,created,text,author(login,name,ringId))," \
                "links(direction,linkType(name,sourceToTarget,targetToSource,directed,aggregation),issues(id,idReadable))" \
-               "&$skip={}&$top={}"
+               "&$skip={skip}&$top={top}"
 
 ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=CommentsCategory,AttachmentsCategory,AttachmentRenameCategory," \
                    "CustomFieldCategory,DescriptionCategory,IssueCreatedCategory,IssueResolvedCategory,LinksCategory," \
@@ -89,14 +89,15 @@ class YouTrack:
 
                 if len(activity_list) < self.page_size:
                     break
-            # logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)}")
+            logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)}")
         return total_activities
 
     def download_issues(self, query, file_path, return_ids=False) -> Union[int, List[str]]:
         skip = 0
         all_issues = []
         while True:
-            response = requests.get(self.issue_list_url.format(query, skip, self.page_size), headers=self.headers,
+            response = requests.get(self.issue_list_url.format(query=query, skip=skip, top=self.page_size),
+                                    headers=self.headers,
                                     verify=False)
             loaded_issues = response.json()
             self.check_response(loaded_issues)
