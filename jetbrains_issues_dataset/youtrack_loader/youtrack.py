@@ -34,6 +34,25 @@ ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCa
                              "author(login,fullName,ringId)" \
                              "&$skip={skip}&$top={top}"
 
+ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCategory," \
+                             "AttachmentsCategory," \
+                             "AttachmentRenameCategory,CustomFieldCategory,DescriptionCategory,IssueCreatedCategory," \
+                             "IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
+                             "SprintCategory,SummaryCategory,TagsCategory,CommentReactionCategory,VotersCategory" \
+                             "&fields=id,idReadable,timestamp,targetMember(id)," \
+                             "target(id,issue(id),name,project(shortName),reporter(id,login,name,fullName,ringId,guest)," \
+                             "idReadable,text,issue(id)," \
+                             "votes," \
+                             "visibility(id,permittedGroups(id,name,ringId))," \
+                             "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
+                             "memberName," \
+                             "category(id)," \
+                             "field(id,name)," \
+                             "added(id,name,login,ringId,value(id,name,login,ringId),reaction,text,bundle(id,name),project(shortName),numberInProject)," \
+                             "removed(id,name,login,ringId,value(id,name,login,ringId),reaction,text,bundle(id,name),project(shortName),numberInProject)," \
+                             "author(id,login,name,fullName,ringId,guest)" \
+                             "&$skip={skip}&$top={top}"
+
 
 class YouTrack:
     def __init__(self, url, token, page_size=1000):
@@ -80,7 +99,7 @@ class YouTrack:
                     for activity in activity_list:
                         activity['element_type'] = 'activity'
                         activity['issue_id'] = issue_id
-                        activity['downloadTimestamp'] = now
+                        activity['download_timestamp'] = now
                         line = json.dumps(activity, ensure_ascii=False)
                         writer.write(line + '\n')
 
