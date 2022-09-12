@@ -21,20 +21,7 @@ ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=CommentsCategory,Attach
                    "reporter(login,name,ringId),created,idReadable,text,issue(id),customFields(id,name,value(id,name,login,ringId)))," \
                    "memberName,added(id,login,name,text),removed(id,login,name,text)&$skip={}&$top={}"
 
-ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCategory,AttachmentsCategory," \
-                             "AttachmentRenameCategory,CustomFieldCategory,DescriptionCategory,IssueCreatedCategory," \
-                             "IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
-                             "SprintCategory,SummaryCategory,TagsCategory,CommentReactionCategory,VotersCategory" \
-                             "&fields=id,idReadable,timestamp,targetMember," \
-                             "target(id,project(shortName),reporter(login,fullName,ringId),idReadable,text,issue(id)," \
-                             "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
-                             "memberName," \
-                             "added(id,login,name,ringId,text,bundle(id,name),project,numberInProject)," \
-                             "removed(id,login,name,ringId,text,bundle(id,name),project,numberInProject)," \
-                             "author(login,fullName,ringId)" \
-                             "&$skip={skip}&$top={top}"
-
-ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCategory," \
+ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCategory,CommentTextCategory," \
                              "AttachmentsCategory," \
                              "AttachmentRenameCategory,CustomFieldCategory,DescriptionCategory,IssueCreatedCategory," \
                              "IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
@@ -43,7 +30,7 @@ ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCa
                              "target(id,issue(id),name,project(shortName),reporter(id,login,name,fullName,ringId,guest)," \
                              "idReadable,text,issue(id)," \
                              "votes," \
-                             "visibility(id,permittedGroups(id,name,ringId))," \
+                             "visibility(id,permittedGroups(id,name,ringId),permittedUsers(id,fullName,ringId))," \
                              "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
                              "memberName," \
                              "category(id)," \
