@@ -95,7 +95,7 @@ class YouTrack:
 
                 if len(activity_list) < self.page_size:
                     break
-            logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)}")
+            logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)} ({issue_id})")
         return total_activities
 
     def download_issues(self, query, file_path, return_ids=False) -> Union[int, List[str]]:
