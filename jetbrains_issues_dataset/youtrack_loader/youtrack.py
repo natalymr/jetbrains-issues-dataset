@@ -88,14 +88,16 @@ class YouTrack:
                         activity['issue_id'] = issue_id
                         activity['download_timestamp'] = now
                         line = json.dumps(activity, ensure_ascii=False)
-                        writer.write(line + '\n')
+                        line = (line + '\n').encode('utf-8', 'replace').decode('utf-8', 'replace')
+                        writer.write(line)
 
                 skip += len(activity_list)
                 total_activities += len(activity_list)
 
                 if len(activity_list) < self.page_size:
                     break
-            logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)} ({issue_id})")
+            # logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)} ({issue_id})")
+        # logging.info(f"Loaded {total_activities} activities for {len(issue_ids)}")
         return total_activities
 
     def download_issues(self, query, file_path, return_ids=False) -> Union[int, List[str]]:
