@@ -22,23 +22,30 @@ ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=CommentsCategory,Attach
                    "memberName,added(id,login,name,text),removed(id,login,name,text)&$skip={}&$top={}"
 
 ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCategory,CommentTextCategory," \
-                             "AttachmentsCategory," \
-                             "AttachmentRenameCategory,CustomFieldCategory,DescriptionCategory,IssueCreatedCategory," \
-                             "IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
-                             "SprintCategory,SummaryCategory,TagsCategory,CommentReactionCategory,VotersCategory" \
-                             "&fields=id,idReadable,timestamp,targetMember(id)," \
-                             "target(id,issue(id),name,project(shortName),reporter(id,login,name,fullName,ringId,guest)," \
-                             "idReadable,text,issue(id)," \
-                             "votes," \
-                             "visibility(id,permittedGroups(id,name,ringId),permittedUsers(id,fullName,ringId))," \
-                             "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
-                             "memberName," \
-                             "category(id)," \
-                             "field(id,name)," \
-                             "added(id,name,login,ringId,value(id,name,login,ringId),reaction,text,bundle(id,name),project(shortName),numberInProject)," \
-                             "removed(id,name,login,ringId,value(id,name,login,ringId),reaction,text,bundle(id,name),project(shortName),numberInProject)," \
-                             "author(id,login,name,fullName,ringId,guest)" \
-                             "&$skip={skip}&$top={top}"
+                 "AttachmentsCategory,AttachmentRenameCategory,CustomFieldCategory,DescriptionCategory," \
+                 "IssueCreatedCategory,IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
+                 "SprintCategory,SummaryCategory,TagsCategory,CommentReactionCategory," \
+                 "VotersCategory,VcsChangeCategory" \
+                 "&fields=id,idReadable,timestamp,targetMember(id)," \
+                 "target(id,issue(id),name,project(id,shortName),branch,date," \
+                    "reporter(id,login,name,fullName,ringId,guest,email)," \
+                 "idReadable,text,issue(id)," \
+                 "votes," \
+                 "visibility(id,permittedGroups(id,name,ringId),permittedUsers(id,fullName,ringId,email))," \
+                 "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
+                 "memberName," \
+                 "category(id)," \
+                 "field(id,name)," \
+                 "added(id,name,login,ringId,email,value(id,name,login,ringId),reaction," \
+                    "text,bundle(id,name),project(id,shortName),numberInProject," \
+                    "state,files,fetched,version,urls,processors(id,project(id,shortName),server(id))," \
+                    "author(id,login,name,fullName,ringId,guest,email))," \
+                 "removed(id,name,login,ringId,email,value(id,name,login,ringId),reaction," \
+                    "text,bundle(id,name),project(id,shortName),numberInProject," \
+                    "state,files,fetched,version,urls,processors(id,project(id,shortName),server(id))," \
+                    "author(id,login,name,fullName,ringId,guest,email))," \
+                 "author(id,login,name,fullName,ringId,guest,email)" \
+                 "&$skip={skip}&$top={top}"
 
 
 class YouTrack:
