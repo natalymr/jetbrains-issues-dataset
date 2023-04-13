@@ -48,6 +48,36 @@ ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories=CommentsCa
                  "&$skip={skip}&$top={top}"
 
 
+
+ALL_CATEGORIES = "CommentsCategory,CommentTextCategory," \
+                 "AttachmentsCategory,AttachmentRenameCategory,CustomFieldCategory,DescriptionCategory," \
+                 "IssueCreatedCategory,IssueResolvedCategory,LinksCategory,ProjectCategory,IssueVisibilityCategory," \
+                 "SprintCategory,SummaryCategory,TagsCategory,CommentReactionCategory," \
+                 "VotersCategory,VcsChangeCategory"
+
+ACTIVITIES_PER_ISSUE_QUERY = "issues/{issue_id}/activities?categories={categories}" \
+                 "&fields=id,idReadable,timestamp,targetMember(id)," \
+                 "target(id,issue(id),name,project(id,shortName),branch,date," \
+                    "reporter(id,login,name,fullName,ringId,guest,email)," \
+                 "idReadable,text,issue(id)," \
+                 "votes," \
+                 "visibility(id,permittedGroups(id,name,ringId),permittedUsers(id,fullName,ringId,email))," \
+                 "created,resolved,customFields(id,name,value(id,name,login,ringId)))," \
+                 "memberName," \
+                 "category(id)," \
+                 "field(id,name)," \
+                 "added(id,name,login,ringId,email,value(id,name,login,ringId),reaction," \
+                    "text,bundle(id,name),project(id,shortName),numberInProject," \
+                    "state,files,fetched,version,urls,processors(id,project(id,shortName),server(id))," \
+                    "author(id,login,name,fullName,ringId,guest,email))," \
+                 "removed(id,name,login,ringId,email,value(id,name,login,ringId),reaction," \
+                    "text,bundle(id,name),project(id,shortName),numberInProject," \
+                    "state,files,fetched,version,urls,processors(id,project(id,shortName),server(id))," \
+                    "author(id,login,name,fullName,ringId,guest,email))," \
+                 "author(id,login,name,fullName,ringId,guest,email)" \
+                 "&$skip={skip}&$top={top}"
+
+
 class YouTrack:
     def __init__(self, url, token, page_size=1000):
         self.url = url
@@ -64,12 +94,15 @@ class YouTrack:
         self.issue_list_url = self.new_api_url + ISSUES_QUERY
         self.activities_per_issue_url = self.new_api_url + ACTIVITIES_PER_ISSUE_QUERY
 
-    def download_activities_per_issue(self, issue_ids, file_path):
+    def download_activities_per_issue(self, issue_ids, file_path, categories=None, no_write_to_file=False):
         total_activities = 0
+        downloaded_activies = []
         for i, issue_id in enumerate(issue_ids):
             skip = 0
             while True:
-                request_url = self.activities_per_issue_url.format(issue_id=issue_id, skip=skip, top=self.page_size)
+                needed_categories = ALL_CATEGORIES if categories is None else categories
+                request_url = self.activities_per_issue_url.format(issue_id=issue_id, categories=needed_categories,
+                                                                   skip=skip, top=self.page_size)
                 activity_list = None
                 attempt = 1
                 while attempt < 5:
@@ -89,23 +122,27 @@ class YouTrack:
 
                 now = round(datetime.datetime.now().timestamp() * 1000)
 
-                with open(file_path, 'a+', encoding='utf-8') as writer:
-                    for activity in activity_list:
-                        activity['element_type'] = 'activity'
-                        activity['issue_id'] = issue_id
-                        activity['download_timestamp'] = now
-                        line = json.dumps(activity, ensure_ascii=False)
-                        line = (line + '\n').encode('utf-8', 'replace').decode('utf-8', 'replace')
-                        writer.write(line)
+                for activity in activity_list:
+                    activity['element_type'] = 'activity'
+                    activity['issue_id'] = issue_id
+                    activity['download_timestamp'] = now
+
+                if no_write_to_file:
+                    downloaded_activies.extend(activity_list)
+                else:
+                    with open(file_path, 'a+', encoding='utf-8') as writer:
+                        for activity in activity_list:
+                            line = json.dumps(activity, ensure_ascii=False)
+                            line = (line + '\n').encode('utf-8', 'replace').decode('utf-8', 'replace')
+                            writer.write(line)
 
                 skip += len(activity_list)
                 total_activities += len(activity_list)
 
                 if len(activity_list) < self.page_size:
                     break
-            # logging.info(f"Loaded {skip} activities for issue {i} / {len(issue_ids)} ({issue_id})")
-        # logging.info(f"Loaded {total_activities} activities for {len(issue_ids)}")
-        return total_activities
+
+        return downloaded_activies if no_write_to_file else total_activities
 
     def download_issues(self, query, file_path, return_ids=False) -> Union[int, List[str]]:
         skip = 0
