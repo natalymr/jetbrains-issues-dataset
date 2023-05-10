@@ -133,6 +133,7 @@ class YouTrack:
                     with open(file_path, 'a+', encoding='utf-8') as writer:
                         for activity in activity_list:
                             line = json.dumps(activity, ensure_ascii=False)
+                            line = line.replace('\u0000', '')
                             line = (line + '\n').encode('utf-8', 'replace').decode('utf-8', 'replace')
                             writer.write(line)
 
