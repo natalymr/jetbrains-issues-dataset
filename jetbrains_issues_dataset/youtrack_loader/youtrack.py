@@ -6,6 +6,16 @@ from typing import Union, List
 
 import requests
 
+
+class IssueWithProblemDownloader(Exception):
+    def __init__(self, message, issue):
+        self.message = message
+        self.issue = issue
+
+    def __str__(self):
+        return self.message + f"for issue: {self.issue}"
+
+
 ISSUES_QUERY = "issues?query={query}&fields=" \
                "id,idReadable,summary,description," \
                "project(shortName),created,resolved,reporter(login,fullName,ringId),commentsCount," \
@@ -118,7 +128,10 @@ class YouTrack:
                 if activity_list is None:
                     raise Exception("Failed to retrieve activities")
 
-                self.check_response(activity_list)
+                try:
+                    self.check_response(activity_list)
+                except Exception:
+                    raise IssueWithProblemDownloader('downloading failed ', issue_id)
 
                 now = round(datetime.datetime.now().timestamp() * 1000)
 
