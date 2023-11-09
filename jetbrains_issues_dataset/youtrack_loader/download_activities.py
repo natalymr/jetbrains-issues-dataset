@@ -15,11 +15,12 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, snapshot_end_time: datetime.datetime,
                   issues_snapshot_file: str, activities_snapshot_file: str, query: str, load_issues=True,
-                  load_activities=True, direction='asc', order_by='created'):
+                  load_activities=True, direction='asc', order_by='created', query_type='common'):
     """
     Most parameters have reasonable defaults set below in the CLI argument parser. Minimum working command from CLI if
     working from source:
     PYTHONPATH="$PYTHONPATH:." python ./jetbrains_issues_dataset/idea/download_activities.py --start 2021-01-01 --access-token YOUR_TOKEN
+    :param query_type: `common` if timing should be added simply by appending to the end of the query, `formal` if timing should be joined by `and` keyword
     :param youtrack: instance of the YouTrack client
     :param snapshot_start_time: earliest possible issue creation timestamp
     :param snapshot_end_time: latest possible issue creation timestamp
@@ -51,7 +52,7 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
     total_activities = 0
     processing_start_time = datetime.datetime.now()
     current_end_date = snapshot_start_time
-    while (direction_flag > 0 and snapshot_start_time < snapshot_end_time) or ((direction_flag < 0 and snapshot_start_time > snapshot_end_time)):
+    while (direction_flag > 0 and snapshot_start_time < snapshot_end_time) or (direction_flag < 0 and snapshot_start_time > snapshot_end_time):
         current_end_date += relativedelta(weeks=1 * direction_flag)
         if (direction_flag > 0 and current_end_date > snapshot_end_time) or (direction_flag < 0 and current_end_date < snapshot_end_time):
             current_end_date = snapshot_end_time
@@ -59,7 +60,7 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
         start = snapshot_start_time.strftime('%Y-%m-%dT%H:%M:%S')
         end = current_end_date.strftime('%Y-%m-%dT%H:%M:%S')
 
-        timed_query = f"{query} {order_by}: {start} .. {end}"
+        timed_query = f"{query} {'' if query_type == 'common' else 'and'} {order_by}: {start} .. {end}"
         logging.info(f"Processing from: {start} to: {end}, query: {timed_query}")
 
         if load_issues:
@@ -83,9 +84,13 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
 def cur_time():
     return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
-def filename_from_query(query:str, start:datetime, end:datetime):
+def filename_from_query(query:str, start:datetime, end:datetime, max_filename_length:int=127):
     filename = re.sub(r'[^A-Za-z]+', '_', query).strip('_')
-    filename = f'{filename}_{start.strftime("%Y%m%d")}_{end.strftime("%Y%m%d")}'
+    dates = f'{start.strftime("%Y%m%d")}_{end.strftime("%Y%m%d")}'
+    if max_filename_length:
+        filename = filename[:max_filename_length - len(dates)] + '_' + dates
+    else:
+        filename = f'{filename}_{dates}'
     return filename
 
 
@@ -143,6 +148,13 @@ def main():
                         help='access token to the server, either string or path to file with token',
                         required=True
                         )
+    parser.add_argument('--query-type',
+                        help='query grammar used, either `common` (default) or `formal`; '
+                        'if `common`, additional query parameters are joined by simply appending to the query string '
+                             '(example: `your_query created: 2021-01-01 .. 2021-01-02`), '
+                             'if `formal`, additional query parameters are joined by `and` operator '
+                             '(example: `your_query and created: 2021-01-01 .. 2021-01-02`)',
+                        choices=['common', 'formal'], default='common')
     parser.add_argument('--query',
                         help='query to filter issues; default is #IDEA',
                         nargs='*',
@@ -173,7 +185,7 @@ def main():
     download_data(youtrack=youtrack, snapshot_start_time=args.start, snapshot_end_time=args.end,
                   issues_snapshot_file=issues_snapshot_file, activities_snapshot_file=activities_snapshot_file,
                   query=query, load_issues=not args.no_issues, load_activities=not args.no_activities,
-                  direction=args.direction, order_by=args.order_by)
+                  direction=args.direction, order_by=args.order_by, query_type=args.query_type)
 
 
 if __name__ == '__main__':
