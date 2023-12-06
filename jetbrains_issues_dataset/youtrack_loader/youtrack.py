@@ -21,7 +21,8 @@ ISSUES_QUERY = "issues?query={query}&fields=" \
                "project(shortName),created,resolved,reporter(login,fullName,ringId),commentsCount," \
                "customFields(id,name,value(id,name,login,ringId))," \
                "comments(id,created,text,author(login,name,ringId))," \
-               "links(direction,linkType(name,sourceToTarget,targetToSource,directed,aggregation),issues(id,idReadable))" \
+               "links(direction,linkType(name,sourceToTarget,targetToSource,directed,aggregation),issues(id,idReadable))," \
+               "tags(id,name)" \
                "&$skip={skip}&$top={top}"
 
 ACTIVITIES_QUERY = "activities/?issueQuery={}&categories=CommentsCategory,AttachmentsCategory,AttachmentRenameCategory," \
