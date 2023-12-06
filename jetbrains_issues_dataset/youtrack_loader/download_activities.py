@@ -14,7 +14,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, snapshot_end_time: datetime.datetime,
-                  issues_snapshot_file: str, activities_snapshot_file: str, query: str, load_issues=True,
+                  query: str, issues_snapshot_file: str = None, activities_snapshot_file: str = None, load_issues=True,
                   load_activities=True, direction='asc', order_by='created', query_type='common'):
     """
     Most parameters have reasonable defaults set below in the CLI argument parser. Minimum working command from CLI if
@@ -32,10 +32,12 @@ def download_data(youtrack: YouTrack, snapshot_start_time: datetime.datetime, sn
     :param direction: download order: asc (from oldest to newest, default) or desc (from newest to oldest)
     :param order_by: download order criteria: order by when issue was created or by when it was last updated
     """
-    with open(issues_snapshot_file, 'w', encoding='utf-8') as writer:
-        pass
-    with open(activities_snapshot_file, 'w', encoding='utf-8') as writer:
-        pass
+    if load_issues:
+        with open(issues_snapshot_file, 'w', encoding='utf-8') as writer:
+            pass
+    if load_activities:
+        with open(activities_snapshot_file, 'w', encoding='utf-8') as writer:
+            pass
 
     assert snapshot_start_time < snapshot_end_time, f'No issues created after {snapshot_start_time} and before {snapshot_end_time}'
     if direction == 'asc':
@@ -182,10 +184,10 @@ def main():
     issues_snapshot_file = f'{root}.issues{ext}'
     activities_snapshot_file = f'{root}.activities{ext}'
 
-    download_data(youtrack=youtrack, snapshot_start_time=args.start, snapshot_end_time=args.end,
+    download_data(youtrack=youtrack, snapshot_start_time=args.start, snapshot_end_time=args.end, query=query,
                   issues_snapshot_file=issues_snapshot_file, activities_snapshot_file=activities_snapshot_file,
-                  query=query, load_issues=not args.no_issues, load_activities=not args.no_activities,
-                  direction=args.direction, order_by=args.order_by, query_type=args.query_type)
+                  load_issues=not args.no_issues, load_activities=not args.no_activities, direction=args.direction,
+                  order_by=args.order_by, query_type=args.query_type)
 
 
 if __name__ == '__main__':
