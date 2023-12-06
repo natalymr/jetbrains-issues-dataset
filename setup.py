@@ -1,17 +1,19 @@
 from distutils.core import setup
 
+package_version = '1.0.0'
+
 setup(
     name='jetbrains-issues-dataset',
     packages=['jetbrains_issues_dataset',
               'jetbrains_issues_dataset.idea',
               'jetbrains_issues_dataset.youtrack_loader'],
-    version='1.0.10',
+    version=package_version,
     license='MIT',
-    description='Dataset of JetBrains issues',
+    description='YouTrack data loader',
     author='Andrey Vokin',
     author_email='andrey.vokin@gmail.com',
-    url='https://github.com/avokin2/jetbrains-issues-dataset',
-    download_url='https://github.com/avokin2/jetbrains-issues-dataset/archive/v_1.0.10.tar.gz',
+    url='https://jetbrains.team/p/yh/repositories/youtrack-data-loader/',
+    download_url=f'https://jetbrains.team/p/yh/packages/pypi/feedback-analysis-toolkit-package-repository/feedback-analysis-toolkit-package-repositoryjetbrains-issues-dataset/{package_version}/jetbrains-issues-dataset-{package_version}.tar.gz?download=true',
     keywords=[],
     install_requires=[
         'urllib3',
